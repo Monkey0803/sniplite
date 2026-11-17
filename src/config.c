@@ -66,6 +66,19 @@ bool hotkey_parse(const WCHAR *s, UINT *mod, UINT *vk)
     return *vk != 0;
 }
 
+int config_hotkey_duplicate(const Config *c, int id, UINT mod, UINT vk)
+{
+    if (!vk)
+        return 0;
+    for (int i = 1; i < HK_COUNT; i++) {
+        if (i == id || i == HK_OCR || i == HK_OCRCOPY)
+            continue;
+        if (c->vk[i] && c->vk[i] == vk && c->mod[i] == mod)
+            return i;
+    }
+    return 0;
+}
+
 void hotkey_format(UINT mod, UINT vk, WCHAR *out)
 {
     out[0] = 0;
@@ -96,11 +109,21 @@ void hotkey_format(UINT mod, UINT vk, WCHAR *out)
 void config_defaults(Config *c)
 {
     memset(c, 0, sizeof *c);
+#if defined(__APPLE__)
+    /* macOS: F1/F3 belong to the system (brightness, mission control), so the port
+     * starts on control-option instead. Everything stays editable. */
+    hotkey_parse(L"Ctrl+Alt+1", &c->mod[HK_CAPTURE], &c->vk[HK_CAPTURE]);
+    hotkey_parse(L"Ctrl+Alt+2", &c->mod[HK_PIN], &c->vk[HK_PIN]);
+    hotkey_parse(L"Ctrl+Alt+Shift+2", &c->mod[HK_TOGGLE], &c->vk[HK_TOGGLE]);
+    hotkey_parse(L"Ctrl+Alt+4", &c->mod[HK_OCR], &c->vk[HK_OCR]);
+    hotkey_parse(L"Ctrl+Alt+Shift+4", &c->mod[HK_OCRCOPY], &c->vk[HK_OCRCOPY]);
+#else
     hotkey_parse(L"F1", &c->mod[HK_CAPTURE], &c->vk[HK_CAPTURE]);
     hotkey_parse(L"F3", &c->mod[HK_PIN], &c->vk[HK_PIN]);
     hotkey_parse(L"Shift+F3", &c->mod[HK_TOGGLE], &c->vk[HK_TOGGLE]);
     hotkey_parse(L"F4", &c->mod[HK_OCR], &c->vk[HK_OCR]);
     hotkey_parse(L"Shift+F4", &c->mod[HK_OCRCOPY], &c->vk[HK_OCRCOPY]);
+#endif
     c->tray = true;
     c->pin_top = true;
     c->auto_update = true;

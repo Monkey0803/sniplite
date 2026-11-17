@@ -38,7 +38,7 @@ const WCHAR *lang_text(int lang, int s); /* text S_... in a language other than 
 const WCHAR *lang_save_filter(void);
 #endif
 
-#ifndef CONSOLE
+#if !defined(CONSOLE) && !defined(__APPLE__)
 /* A dialog of this program in the font of the language in use (the resource names the
  * Chinese one). Both work like the functions they are named after. */
 INT_PTR lang_dialog_box(HINSTANCE inst, int id, HWND owner, DLGPROC proc);

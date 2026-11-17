@@ -20,4 +20,8 @@ void config_set_pin_top(bool on);            /* that one setting, changed from a
 void config_path(WCHAR *out, int cap);
 
 bool hotkey_parse(const WCHAR *s, UINT *mod, UINT *vk); /* "Ctrl+Alt+A", "F1", "none" */
-void hotkey_format(UINT mod, UINT vk, WCHAR *out);      /* out: >= 40 chars; "none" if vk == 0 */
+void hotkey_format(UINT mod, UINT vk, WCHAR *out); /* out: >= 40 chars; "none" if vk == 0 */
+
+/* The other hotkey that would be the same combination, or 0. The preferences window refuses
+ * a duplicate before writing it; the port has no OCR hotkeys. */
+int config_hotkey_duplicate(const Config *c, int id, UINT mod, UINT vk);

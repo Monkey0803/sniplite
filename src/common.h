@@ -1,6 +1,11 @@
 /* sniplite - lightweight screenshot tool. Shared declarations. */
 #pragma once
 
+#if defined(__APPLE__)
+/* The macOS port (mac/) compiles the shared C with mac/plat.h in place of windows.h:
+ * the same type and function names, with the meaning they have on this side. */
+#include "plat.h"
+#else
 #ifndef UNICODE
 #define UNICODE
 #endif
@@ -17,12 +22,14 @@
 #define COBJMACROS
 #endif
 #include <windows.h>
+#endif
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
 
 #define SNIPLITE_VERSION L"1.3.2"
 
+#if !defined(__APPLE__)
 #define DAEMON_CLASS L"sniplite.daemon"
 #define DAEMON_MUTEX L"Local\\sniplite.daemon"
 
@@ -31,6 +38,7 @@
 #define IPC_REPLY 0x4C534E02u
 #define IPC_BASE  0x1000 /* WM_COPYDATA result = IPC_BASE + exit code */
 #define IPC_SEP   L'\x1F'
+#endif
 
 /* Exit codes shared by the CLI and the daemon. */
 enum {
@@ -42,9 +50,11 @@ enum {
     EXIT_HOTKEY = 5,
 };
 
+#if !defined(__APPLE__)
 /* Private window messages of the daemon window. */
 #define WM_APP_GPU_READY (WM_APP + 1) /* lParam = GpuState* built on a worker thread */
 #define WM_APP_OCR_THEN (WM_APP + 4)  /* a capture started for its text has its selection: wParam = 1 show it, 2 copy it */
+#endif
 
 #define MINI(a, b) ((a) < (b) ? (a) : (b))
 #define MAXI(a, b) ((a) > (b) ? (a) : (b))
@@ -82,15 +92,16 @@ void str_add_json(Str *s, const WCHAR *t);    /* quoted JSON string, non-ASCII a
 void str_add_quoted(Str *s, const WCHAR *a);  /* one command-line argument, MSVC quoting */
 void str_free(Str *s);
 
+/* Split a command line with the MSVC rules (no shell32 needed). */
+WCHAR **cmdline_split(const WCHAR *cmd, int *argc);
+bool arg_eq(const WCHAR *a, const WCHAR *b); /* case-insensitive */
+
+#if !defined(__APPLE__)
 /* ---- ipc.c (client side, shared by sniplite.exe and sniplite.com) --------------- */
 HWND ipc_find(void);
 HWND ipc_find_dialog(const WCHAR *mark); /* the open dialog carrying that mark (settings.h), or NULL */
 /* Run a command in the daemon. Returns its exit code, or -1 if it could not be reached. */
 int ipc_call(HWND daemon, int argc, WCHAR **argv, Str *reply);
-
-/* Split a command line with the MSVC rules (no shell32 needed). */
-WCHAR **cmdline_split(const WCHAR *cmd, int *argc);
-bool arg_eq(const WCHAR *a, const WCHAR *b); /* case-insensitive */
 
 /* DPI scale (1.0 = 96 dpi) of the monitor containing a screen point. */
 float dpi_scale_at(POINT pt);
@@ -106,3 +117,4 @@ typedef struct {
 } Img;
 bool img_create(Img *im, int w, int h);
 void img_destroy(Img *im);
+#endif /* !__APPLE__ */

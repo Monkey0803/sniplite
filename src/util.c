@@ -254,6 +254,8 @@ bool arg_eq(const WCHAR *a, const WCHAR *b)
 }
 
 /* ---- DPI ----------------------------------------------------------------- */
+/* Windows only: the macOS side measures scale per NSScreen instead. */
+#if !defined(__APPLE__)
 
 typedef HRESULT(WINAPI *PFN_GetDpiForMonitor)(HMONITOR, int, UINT *, UINT *);
 
@@ -278,7 +280,11 @@ float dpi_scale_at(POINT pt)
     return dpi_scale_of(MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST));
 }
 
+#endif /* !__APPLE__ */
+
 /* ---- Img ----------------------------------------------------------------- */
+/* Windows only: the macOS Img is a plain BGRX buffer (mac/plat.h, mac/compat.m). */
+#if !defined(__APPLE__)
 
 bool img_create(Img *im, int w, int h)
 {
@@ -319,3 +325,5 @@ void img_destroy(Img *im)
         DeleteObject(im->bmp);
     memset(im, 0, sizeof *im);
 }
+
+#endif /* !__APPLE__ */

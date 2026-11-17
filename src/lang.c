@@ -137,12 +137,16 @@ const WCHAR *lang_text(int lang, int s) { return table(lang)[s]; }
 
 void ini_path(WCHAR *out, int cap)
 {
+#if defined(__APPLE__)
+    snip_ini_path(out, cap); /* ~/Library/Application Support/sniplite/sniplite.ini */
+#else
     DWORD n = GetModuleFileNameW(NULL, out, (DWORD)cap);
     WCHAR *sl = n && n < (DWORD)cap ? wcsrchr(out, L'\\') : NULL;
     if (sl && (sl - out) + 13 < cap)
         lstrcpyW(sl + 1, L"sniplite.ini");
     else
         out[0] = 0;
+#endif
 }
 
 void lang_init(const WCHAR *ini)
@@ -172,8 +176,9 @@ const WCHAR *lang_save_filter(void)
 }
 #endif
 
-#ifndef CONSOLE
+#if !defined(CONSOLE) && !defined(__APPLE__)
 /* ---- dialogs ------------------------------------------------------------------------
+ * Windows only: the macOS preferences window is AppKit (mac/settings.m).
  * A dialog takes its font, and from the font its size on screen, out of its template.
  * The templates in the .rc name one font, so each is copied with the font of the
  * language in use written in its place.

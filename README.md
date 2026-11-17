@@ -136,3 +136,7 @@ sniplite itself uses nothing but the system libraries of Windows. The optional t
 - [ONNX Runtime](https://github.com/microsoft/onnxruntime) 1.26.0, Copyright (c) Microsoft Corporation, MIT License
 - The PP-OCRv6 models of [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR), Copyright (c) PaddlePaddle Authors, Apache License 2.0
 - Their ONNX form comes from [RapidOCR](https://github.com/RapidAI/RapidOCR), Apache License 2.0
+
+## macOS port
+
+There is a native macOS port in development: see [README.mac.md](README.mac.md) and the source in `mac/`.
